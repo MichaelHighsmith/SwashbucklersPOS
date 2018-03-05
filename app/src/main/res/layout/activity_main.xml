@@ -6,25 +6,88 @@
     android:layout_height="match_parent"
     tools:context="com.satyrlabs.swashbucklerspos.MainActivity">
 
-    <Button
-        android:id="@+id/chicken_sandwich"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Chicken Sandwich"
-        android:onClick="chickenSandwich"/>
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
 
-    <Button
-        android:id="@+id/Poboy"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="PoBoy"
-        android:onClick="PoBoy"/>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/menu_items_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-    <Button
-        android:id="@+id/launch_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Print"
-        android:onClick="print"/>
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/new_item"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/plus"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="16dp"/>
+
+
+    </RelativeLayout>
+
+
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Total: "
+                android:textSize="24sp"/>
+
+            <TextView
+                android:id="@+id/total_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="24sp"/>
+
+        </LinearLayout>
+
+
+
+        <Button
+            android:id="@+id/chicken_sandwich"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="chickenSandwich"
+            android:text="Chicken Sandwich"
+            tools:layout_editor_absoluteX="273dp"
+            tools:layout_editor_absoluteY="160dp" />
+
+        <Button
+            android:id="@+id/Poboy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="PoBoy"
+            android:text="PoBoy"
+            tools:layout_editor_absoluteX="151dp"
+            tools:layout_editor_absoluteY="100dp" />
+
+        <Button
+            android:id="@+id/launch_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="print"
+            android:text="Checkout"
+            tools:layout_editor_absoluteX="52dp"
+            tools:layout_editor_absoluteY="160dp" />
+
+    </LinearLayout>
+
+
 
 </LinearLayout>

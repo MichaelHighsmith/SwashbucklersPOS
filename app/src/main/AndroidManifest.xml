@@ -20,6 +20,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".NewMenuItemActivity"/>
+        <provider
+            android:authorities="com.satyrlabs.swashbucklerspos"
+            android:name=".MenuProvider"
+            android:exported="true"/>
     </application>
 
 </manifest>
