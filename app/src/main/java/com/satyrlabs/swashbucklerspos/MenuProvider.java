@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import static com.satyrlabs.swashbucklerspos.MenuContract.TABLE_NAME;
+import static com.satyrlabs.swashbucklerspos.MenuContract._ID;
 
 public class MenuProvider extends ContentProvider {
 
@@ -53,8 +54,14 @@ public class MenuProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+        SQLiteDatabase database = mDbHelper.getWritableDatabase();
+        selection = _ID + "=?";
+        int rowsDeleted = database.delete(TABLE_NAME, selection, selectionArgs);
+        if(rowsDeleted != 0){
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsDeleted;
     }
 
     @Override
