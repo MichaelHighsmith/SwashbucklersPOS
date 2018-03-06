@@ -29,50 +29,40 @@
 
     </RelativeLayout>
 
-
-
     <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tax_location_text"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_alignParentBottom="true"
-            android:layout_margin="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Total: "
-                android:textSize="32sp"
-                android:textColor="@android:color/black"/>
-
-            <TextView
-                android:id="@+id/total_price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:textSize="32sp"
-                android:textColor="@android:color/black"/>
-
-        </LinearLayout>
-
+            android:text="Tax: "
+            android:textSize="24sp"
+            android:layout_toLeftOf="@+id/tax_spinner"
+            android:layout_toStartOf="@+id/tax_spinner"/>
 
         <Spinner
             android:id="@+id/tax_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"/>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/current_order_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tax_spinner"/>
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Clear Order"
-            android:onClick="clearOrder"/>
-
+            android:onClick="clearOrder"
+            android:layout_above="@+id/pretax_total_price_text" />
 
         <Button
             android:id="@+id/launch_button"
@@ -96,6 +86,68 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:visibility="invisible"/>
+
+        <TextView
+            android:id="@+id/pretax_total_price_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pretax Total: "
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:layout_above="@+id/tax_text"/>
+
+        <TextView
+            android:id="@+id/pretax_total_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:layout_above="@+id/tax_text"
+            android:layout_toRightOf="@+id/pretax_total_price_text"
+            android:layout_toEndOf="@+id/pretax_total_price_text"/>
+
+        <TextView
+            android:id="@+id/tax_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tax: "
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:layout_above="@+id/total_price_text"/>
+
+        <TextView
+            android:id="@+id/tax_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:layout_above="@+id/total_price_text"
+            android:layout_toRightOf="@+id/tax_text"
+            android:layout_toEndOf="@+id/tax_text"/>
+
+        <TextView
+            android:id="@+id/total_price_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total: "
+            android:textSize="32sp"
+            android:textColor="@android:color/black"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="8dp"/>
+
+        <TextView
+            android:id="@+id/total_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="32sp"
+            android:textColor="@android:color/black"
+            android:layout_toRightOf="@+id/total_price_text"
+            android:layout_toEndOf="@+id/total_price_text"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="8dp"/>
 
     </RelativeLayout>
 

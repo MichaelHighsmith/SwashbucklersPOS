@@ -14,10 +14,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.starmicronics.stario.PortInfo;
 import com.starmicronics.stario.StarIOPort;
@@ -37,9 +39,19 @@ import static com.satyrlabs.swashbucklerspos.MenuContract._ID;
 public class MainActivity extends AppCompatActivity implements MenuItemAdapter.AdapterCallback{
 
     RecyclerView menuItemsRecyclerView;
+    RecyclerView currentOrderRecyclerView;
+    CurrentOrderAdapter currentOrderAdapter;
     MenuItemAdapter adapter;
-    TextView priceTotal;
-    float price = 0;
+
+    TextView preTaxTotalTV;
+    TextView taxTotalTV;
+    TextView totalPriceTV;
+
+    //floats for all tax calculations
+    float preTaxPrice = 0;
+    float taxTotalPrice = 0;
+    float totalPrice = 0;
+    float taxRate;
 
     ArrayList<String> orderItems;
     ArrayList<Float> orderItemPrices;
@@ -49,29 +61,38 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
     ProgressBar progress;
     Spinner taxSpinner;
 
+
+
     LoaderManager.LoaderCallbacks<Cursor> cursorLoader;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //id the views
         progress = findViewById(R.id.progressBar);
-
         taxSpinner = findViewById(R.id.tax_spinner);
-        List<Float> taxes = new ArrayList<>();
-        taxes.add(.055f);
-        taxes.add(.055f);
-        taxes.add(.055f);
-        taxes.add(.065f);
-        taxes.add(.075f);
+        totalPriceTV = findViewById(R.id.total_price);
+        taxTotalTV = findViewById(R.id.tax_price);
+        preTaxTotalTV = findViewById(R.id.pretax_total_price);
+        menuItemsRecyclerView = findViewById(R.id.menu_items_recyclerview);
+        currentOrderRecyclerView = findViewById(R.id.current_order_recycler_view);
 
-        ArrayAdapter taxAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, taxes);
-        taxSpinner.setAdapter(taxAdapter);
-
-        priceTotal = findViewById(R.id.total_price);
+        //Create arrays for the current order items and prices (these grow simultaneously (could use dictionary))
         orderItems = new ArrayList<>();
         orderItemPrices = new ArrayList<>();
+
+        currentOrderAdapter = new CurrentOrderAdapter(this, orderItems, orderItemPrices);
+        currentOrderRecyclerView.setAdapter(currentOrderAdapter);
+
+        menuItemsRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
+        currentOrderRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        //attach adapter to tax spinner
+        setUpTaxSpinner();
+
 
         FloatingActionButton newItem = findViewById(R.id.new_item);
         newItem.setOnClickListener(new View.OnClickListener() {
@@ -82,23 +103,58 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
             }
         });
 
-        menuItemsRecyclerView = findViewById(R.id.menu_items_recyclerview);
-        menuItemsRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-
+        //Just one right now (content provider cursor loader)
         createLoaders();
-
+        //Start cursorLoader
         getLoaderManager().initLoader(1, null, cursorLoader);
+    }
+
+    void setUpTaxSpinner(){
+        ArrayAdapter taxAdapter = ArrayAdapter.createFromResource(this, R.array.array_tax_locations, android.R.layout.simple_spinner_item);
+        taxAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+        taxSpinner.setAdapter(taxAdapter);
+
+        taxSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selection = (String) parent.getItemAtPosition(position);
+                switch(selection){
+                    case "Tax Location 1":
+                        taxRate = .05f;
+                        break;
+                    case "Tax Location 2":
+                        taxRate = .06f;
+                        break;
+                    case "Tax Location 3":
+                        taxRate = .07f;
+                        break;
+                    case "Tax Location 4":
+                        taxRate = .08f;
+                        break;
+                }
+                taxTotalPrice = preTaxPrice * taxRate;
+                taxTotalTV.setText(String.format("%,.2f", taxTotalPrice));
+                totalPrice = preTaxPrice + taxTotalPrice;
+                totalPriceTV.setText(String.format("%,.2f", totalPrice));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
     }
 
 
     public void print(View view) {
-
         SubmitOrderTask task = new SubmitOrderTask();
         task.execute("whatever");
-
     }
 
+    //Async task for submitting the order to printer
     private class SubmitOrderTask extends AsyncTask<String, Void, String>{
+
+
 
         @Override
         protected void onPreExecute(){
@@ -113,15 +169,12 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
 
         @Override
         protected void onPostExecute(String result){
-            //reset the items
-            price = 0;
-            priceTotal.setText(String.format("%,.2f", price));
-            orderItems = new ArrayList<>();
-            orderItemPrices = new ArrayList<>();
+            resetOrder();
             progress.setVisibility(View.INVISIBLE);
         }
     }
 
+    //Called in AsyncTask. mPoP has issues connecting sometimes, so on fail call recursive printReceipt until success
     public void printReceipt(){
 
         String portName = "";
@@ -129,16 +182,15 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
             List<PortInfo> portList = StarIOPort.searchPrinter("BT:");
 
             PortInfo currentPort = portList.get(0);
-            Log.i("LOG", "Port Name:" + currentPort.getPortName());
-
             portName = currentPort.getPortName();
-
             port = StarIOPort.getPort(portName, "Portable", 10000, MainActivity.this);
 
             StarPrinterStatus status = port.beginCheckedBlock();
 
             byte[] title = "      Swashbucklers     ".getBytes();
-            byte[] finalPrice = String.format("%,.2f", price).getBytes();
+            byte[] preTaxTotalByte = ("Pre-tax total:     " + String.format("%,.2f", preTaxPrice)).getBytes();
+            byte[] taxTotalByte = ("Tax:       " + String.format("%,.2f", taxTotalPrice)).getBytes();
+            byte[] totalPriceByte = ("Total:      " + String.format("%,.2f", totalPrice)).getBytes();
 
             ICommandBuilder builder = StarIoExt.createCommandBuilder(StarIoExt.Emulation.StarPRNT);
             builder.appendLineFeed(title);
@@ -150,8 +202,9 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
                 builder.appendLineFeed(currentItemBytes);
             }
             builder.appendLineFeed();
-            builder.appendLineFeed();
-            builder.appendLineFeed(finalPrice);
+            builder.appendLineFeed(preTaxTotalByte);
+            builder.appendLineFeed(taxTotalByte);
+            builder.appendLineFeed(totalPriceByte);
             builder.appendCutPaper(ICommandBuilder.CutPaperAction.PartialCutWithFeed);
             builder.endDocument();
 
@@ -183,31 +236,45 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
             } catch (StarIOPortException e) {
                 Log.i("Log", "Error closing the port");
             }
-
         }
     }
 
     public void clearOrder(View view){
-        //reset the items
-        price = 0;
-        priceTotal.setText(String.format("%,.2f", price));
+        resetOrder();
+    }
+
+    public void resetOrder(){
+        preTaxPrice = 0;
+        taxTotalPrice = 0;
+        totalPrice = 0;
+        preTaxTotalTV.setText(String.format("%,.2f", preTaxPrice));
+        taxTotalTV.setText(String.format("%,.2f", taxTotalPrice));
+        totalPriceTV.setText(String.format("%,.2f", totalPrice));
         orderItems = new ArrayList<>();
         orderItemPrices = new ArrayList<>();
+
+        currentOrderAdapter = new CurrentOrderAdapter(this, orderItems, orderItemPrices);
+        currentOrderRecyclerView.setAdapter(currentOrderAdapter);
     }
 
+    //Menu item's onClick
     @Override
     public void onItemClicked(String itemName, float itemPrice) {
-        price += itemPrice;
-        priceTotal.setText(String.format("%,.2f", price));
+        preTaxPrice += itemPrice;
+        preTaxTotalTV.setText(String.format("%,.2f", preTaxPrice));
+        taxTotalPrice = preTaxPrice * taxRate;
+        taxTotalTV.setText(String.format("%,.2f", taxTotalPrice));
+        totalPrice = preTaxPrice + taxTotalPrice;
+        totalPriceTV.setText(String.format("%,.2f", totalPrice));
+
         orderItems.add(itemName);
         orderItemPrices.add(itemPrice);
+
+        currentOrderAdapter.notifyDataSetChanged();
     }
 
+    //Create cursor loader for content provider
     public void createLoaders(){
-
-
-
-
         cursorLoader = new LoaderManager.LoaderCallbacks<Cursor>(){
             @Override
             public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {

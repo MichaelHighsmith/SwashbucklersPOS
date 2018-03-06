@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">SwashbucklersPOS</string>
+    <string name="tax_location_1">Tax Location 1</string>
+    <string name="tax_location_2">Tax Location 2</string>
+    <string name="tax_location_3">Tax Location 3</string>
+    <string name="tax_location_4">Tax Location 4</string>
 </resources>
