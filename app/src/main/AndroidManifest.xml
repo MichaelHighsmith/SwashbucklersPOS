@@ -25,6 +25,7 @@
             android:authorities="com.satyrlabs.swashbucklerspos"
             android:name=".MenuProvider"
             android:exported="true"/>
+        <activity android:name=".CashCheckoutActivity"/>
     </application>
 
 </manifest>

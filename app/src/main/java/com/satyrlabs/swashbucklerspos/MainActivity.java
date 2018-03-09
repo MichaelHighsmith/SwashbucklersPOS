@@ -13,6 +13,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -61,10 +62,7 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
     ProgressBar progress;
     Spinner taxSpinner;
 
-
-
     LoaderManager.LoaderCallbacks<Cursor> cursorLoader;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +91,6 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
         //attach adapter to tax spinner
         setUpTaxSpinner();
 
-
         FloatingActionButton newItem = findViewById(R.id.new_item);
         newItem.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
     }
 
     void setUpTaxSpinner(){
-        ArrayAdapter taxAdapter = ArrayAdapter.createFromResource(this, R.array.array_tax_locations, android.R.layout.simple_spinner_item);
+        ArrayAdapter taxAdapter = ArrayAdapter.createFromResource(this, R.array.array_tax_locations, R.layout.spinner_item);
         taxAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         taxSpinner.setAdapter(taxAdapter);
 
@@ -149,6 +146,12 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
     public void print(View view) {
         SubmitOrderTask task = new SubmitOrderTask();
         task.execute("whatever");
+    }
+
+    public void cashCheckout(View view){
+        Intent cashIntent = new Intent(MainActivity.this, CashCheckoutActivity.class);
+        cashIntent.putExtra("total", totalPrice);
+        startActivity(cashIntent);
     }
 
     //Async task for submitting the order to printer
@@ -301,6 +304,14 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
                 adapter.notifyDataSetChanged();
             }
         };
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        return true;
     }
 }
 

@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/wood_planks">
 
     <TextView
         android:id="@+id/textView"
@@ -15,6 +16,7 @@
         android:layout_marginTop="8dp"
         android:text="New Menu Item"
         android:textSize="48sp"
+        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -29,6 +31,7 @@
         android:text="Item Name: "
         android:textAlignment="center"
         android:textSize="28sp"
+        android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.374"
         app:layout_constraintStart_toStartOf="parent"
@@ -42,6 +45,7 @@
         android:text="Price: "
         android:textAlignment="center"
         android:textSize="28sp"
+        android:textColor="@android:color/white"
         app:layout_constraintStart_toStartOf="@+id/textView2"
         app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
@@ -53,6 +57,8 @@
         android:ems="10"
         android:hint="Item Name"
         android:inputType="textPersonName"
+        android:textColor="@android:color/white"
+        android:textColorHint="#DDDDDD"
         app:layout_constraintStart_toEndOf="@+id/textView2"
         app:layout_constraintTop_toTopOf="@+id/textView2" />
 
@@ -63,7 +69,8 @@
         android:layout_marginBottom="56dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:background="@android:color/darker_gray"
+        android:background="@android:color/black"
+        android:textColor="@android:color/white"
         android:onClick="addMenuItem"
         android:text="Add Item"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -77,6 +84,8 @@
         android:ems="10"
         android:hint="$5.00"
         android:inputType="numberDecimal"
+        android:textColor="@android:color/white"
+        android:textColorHint="#DDDDDD"
         app:layout_constraintStart_toStartOf="@+id/nameInput"
         app:layout_constraintTop_toTopOf="@+id/textView3" />
 </android.support.constraint.ConstraintLayout>

@@ -10,7 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         tools:hint="Item Name"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:textColor="@android:color/white"/>
 
     <TextView
         android:id="@+id/current_order_item_price"
@@ -19,6 +20,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         tools:hint="$5.00"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:textColor="@android:color/white"/>
 
 </RelativeLayout>

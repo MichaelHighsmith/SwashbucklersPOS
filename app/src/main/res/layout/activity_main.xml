@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.satyrlabs.swashbucklerspos.MainActivity">
+    tools:context="com.satyrlabs.swashbucklerspos.MainActivity"
+    android:background="@drawable/wood_planks">
 
     <RelativeLayout
         android:layout_width="0dp"
@@ -26,7 +27,6 @@
             android:layout_alignParentBottom="true"
             android:layout_margin="16dp"/>
 
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -40,7 +40,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Tax: "
-            android:textSize="24sp"
+            android:textSize="28sp"
+            android:textColor="@android:color/white"
             android:layout_toLeftOf="@+id/tax_spinner"
             android:layout_toStartOf="@+id/tax_spinner"/>
 
@@ -49,34 +50,56 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
+            android:dropDownSelector="@android:color/white"
             android:layout_alignParentRight="true"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/current_order_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/tax_spinner"/>
+            android:layout_below="@+id/tax_spinner"
+            android:layout_above="@+id/cash_checkout"/>
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="110dp"
             android:layout_height="wrap_content"
             android:text="Clear Order"
             android:onClick="clearOrder"
-            android:layout_above="@+id/pretax_total_price_text" />
+            android:layout_above="@+id/pretax_total_price_text"
+            android:id="@+id/button2"
+            android:textColor="@android:color/white"
+            android:background="@android:color/black"/>
+
+        <Button
+            android:id="@+id/cash_checkout"
+            android:layout_width="150dp"
+            android:layout_height="80dp"
+            android:text="Cash"
+            android:textSize="28sp"
+            android:textColor="@android:color/white"
+            android:background="@android:color/black"
+            android:layout_above="@+id/launch_button"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:onClick="cashCheckout"/>
 
         <Button
             android:id="@+id/launch_button"
-            android:layout_width="180dp"
-            android:layout_height="100dp"
-            android:onClick="print"
-            android:text="Checkout"
-            android:textSize="28sp"
-            tools:layout_editor_absoluteX="52dp"
-            tools:layout_editor_absoluteY="160dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
+            android:layout_width="150dp"
+            android:layout_height="80dp"
             android:layout_alignParentBottom="true"
-            android:layout_margin="16dp"/>
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_margin="16dp"
+            android:onClick="print"
+            android:text="Credit"
+            android:textSize="28sp"
+            android:textColor="@android:color/white"
+            android:background="@android:color/black"
+            tools:layout_editor_absoluteX="52dp"
+            tools:layout_editor_absoluteY="160dp" />
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -93,7 +116,7 @@
             android:layout_height="wrap_content"
             android:text="Pretax Total: "
             android:textSize="20sp"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:layout_above="@+id/tax_text"/>
 
         <TextView
@@ -102,7 +125,7 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textSize="20sp"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:layout_above="@+id/tax_text"
             android:layout_toRightOf="@+id/pretax_total_price_text"
             android:layout_toEndOf="@+id/pretax_total_price_text"/>
@@ -113,7 +136,7 @@
             android:layout_height="wrap_content"
             android:text="Tax: "
             android:textSize="20sp"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:layout_above="@+id/total_price_text"/>
 
         <TextView
@@ -122,7 +145,7 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textSize="20sp"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:layout_above="@+id/total_price_text"
             android:layout_toRightOf="@+id/tax_text"
             android:layout_toEndOf="@+id/tax_text"/>
@@ -133,7 +156,7 @@
             android:layout_height="wrap_content"
             android:text="Total: "
             android:textSize="32sp"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:layout_alignParentBottom="true"
             android:layout_margin="8dp"/>
 
@@ -143,7 +166,7 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textSize="32sp"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:layout_toRightOf="@+id/total_price_text"
             android:layout_toEndOf="@+id/total_price_text"
             android:layout_alignParentBottom="true"
