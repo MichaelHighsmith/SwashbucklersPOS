@@ -2,10 +2,19 @@
 <resources>
 
     <string-array name="array_tax_locations">
-        <item>@string/tax_location_1</item>
-        <item>@string/tax_location_2</item>
-        <item>@string/tax_location_3</item>
-        <item>@string/tax_location_4</item>
+        <item>@string/warrenton</item>
+        <item>@string/unincorporated_warren_county</item>
+        <item>@string/marthasville</item>
+        <item>@string/unincorporated_st_charles_county</item>
+        <item>@string/unincorporated_franklin_county</item>
+        <item>@string/new_mellie</item>
+        <item>@string/wentzville</item>
+        <item>@string/ofallon</item>
+        <item>@string/st_peters</item>
+        <item>@string/wright_city</item>
+        <item>@string/washington</item>
+        <item>@string/union</item>
+
     </string-array>
 
 

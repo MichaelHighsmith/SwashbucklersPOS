@@ -1,9 +1,12 @@
 package com.satyrlabs.swashbucklerspos;
 
+import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ActivityNotFoundException;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
@@ -21,7 +24,11 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.MenuItem;
 
+import com.squareup.sdk.pos.ChargeRequest;
+import com.squareup.sdk.pos.PosClient;
+import com.squareup.sdk.pos.PosSdk;
 import com.starmicronics.stario.PortInfo;
 import com.starmicronics.stario.StarIOPort;
 import com.starmicronics.stario.StarIOPortException;
@@ -36,6 +43,7 @@ import static com.satyrlabs.swashbucklerspos.MenuContract.CONTENT_URI;
 import static com.satyrlabs.swashbucklerspos.MenuContract.ITEM_NAME;
 import static com.satyrlabs.swashbucklerspos.MenuContract.ITEM_PRICE;
 import static com.satyrlabs.swashbucklerspos.MenuContract._ID;
+import static com.squareup.sdk.pos.CurrencyCode.USD;
 
 public class MainActivity extends AppCompatActivity implements MenuItemAdapter.AdapterCallback{
 
@@ -64,10 +72,15 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
 
     LoaderManager.LoaderCallbacks<Cursor> cursorLoader;
 
+    private PosClient posClient;
+    private static final int CHARGE_REQUEST_CODE = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        posClient = PosSdk.createClient(this, "CLIENT_ID_HERE");
 
         //id the views
         progress = findViewById(R.id.progressBar);
@@ -116,17 +129,41 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selection = (String) parent.getItemAtPosition(position);
                 switch(selection){
-                    case "Tax Location 1":
-                        taxRate = .05f;
+                    case "Warrenton":
+                        taxRate = .08975f;
                         break;
-                    case "Tax Location 2":
-                        taxRate = .06f;
+                    case "Unincorporated Warren County":
+                        taxRate = .062250f;
                         break;
-                    case "Tax Location 3":
-                        taxRate = .07f;
+                    case "Marthasville":
+                        taxRate = .07725f;
                         break;
-                    case "Tax Location 4":
-                        taxRate = .08f;
+                    case "Unincorporated St. Charles County":
+                        taxRate = .0595f;
+                        break;
+                    case "Unincorporated Franklin County":
+                        taxRate = .05975f;
+                        break;
+                    case "New Mellie":
+                        taxRate = .0795f;
+                        break;
+                    case "Wentzville":
+                        taxRate = .0845f;
+                        break;
+                    case "Ofallon":
+                        taxRate = .0795f;
+                        break;
+                    case "St. Peters":
+                        taxRate = .0795f;
+                        break;
+                    case "Wright City":
+                        taxRate = .07975f;
+                        break;
+                    case "Washington":
+                        taxRate = .0835f;
+                        break;
+                    case "Union":
+                        taxRate = .08975f;
                         break;
                 }
                 taxTotalPrice = preTaxPrice * taxRate;
@@ -142,10 +179,47 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
         });
     }
 
+    public void creditCheckout(View view) {
+        //convert the float to an underscore int
+        float squareTotalFloat = totalPrice * 100;
+        int squareTotal = (int) squareTotalFloat;
 
-    public void print(View view) {
-        SubmitOrderTask task = new SubmitOrderTask();
-        task.execute("whatever");
+        //Square
+        ChargeRequest request = new ChargeRequest.Builder(squareTotal, USD).build();
+        try{
+            Intent intent = posClient.createChargeIntent(request);
+            startActivityForResult(intent, CHARGE_REQUEST_CODE);
+        } catch (ActivityNotFoundException e){
+            Toast.makeText(this, "Square Point of Sale app is not installed!", Toast.LENGTH_SHORT).show();
+            posClient.openPointOfSalePlayStoreListing();
+        }
+    }
+
+    //After the square payment is initiated, receive either success code or failure code.  If success then print receipt
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == CHARGE_REQUEST_CODE){
+            if(data == null){
+                return;
+            }
+
+            if(resultCode == Activity.RESULT_OK){
+                ChargeRequest.Success success = posClient.parseChargeSuccess(data);
+                Toast.makeText(this, "Transaction successful!", Toast.LENGTH_SHORT).show();
+                //print receipt
+                SubmitOrderTask task = new SubmitOrderTask();
+                task.execute("whatever");
+            } else {
+                ChargeRequest.Error error = posClient.parseChargeError(data);
+                if(error.code == ChargeRequest.ErrorCode.TRANSACTION_ALREADY_IN_PROGRESS){
+                    Toast.makeText(this, "A transaction is already in progress", Toast.LENGTH_SHORT).show();
+                    posClient.launchPointOfSale();
+                } else {
+                    Toast.makeText(this, "Transaction error", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
     }
 
     public void cashCheckout(View view){
@@ -157,8 +231,6 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
     //Async task for submitting the order to printer
     private class SubmitOrderTask extends AsyncTask<String, Void, String>{
 
-
-
         @Override
         protected void onPreExecute(){
             progress.setVisibility(View.VISIBLE);
@@ -166,13 +238,23 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
 
         @Override
         protected String doInBackground(String... urls){
+            //print
             printReceipt();
             return "Task result";
         }
 
         @Override
         protected void onPostExecute(String result){
+
+            //update total credit income
+            SharedPreferences sharedPreferences = getSharedPreferences("myPref", 0);
+            float totalCreditIncome = sharedPreferences.getFloat("totalCreditIncome", 0.0f);
+            totalCreditIncome = totalCreditIncome + totalPrice;
+            sharedPreferences.edit().putFloat("totalCreditIncome", totalCreditIncome).apply();
+
+            //Set values back to 0
             resetOrder();
+
             progress.setVisibility(View.INVISIBLE);
         }
     }
@@ -190,10 +272,11 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
 
             StarPrinterStatus status = port.beginCheckedBlock();
 
-            byte[] title = "      Swashbucklers     ".getBytes();
+            byte[] title = "         Swashbucklers     ".getBytes();
             byte[] preTaxTotalByte = ("Pre-tax total:     " + String.format("%,.2f", preTaxPrice)).getBytes();
-            byte[] taxTotalByte = ("Tax:       " + String.format("%,.2f", taxTotalPrice)).getBytes();
-            byte[] totalPriceByte = ("Total:      " + String.format("%,.2f", totalPrice)).getBytes();
+            byte[] taxTotalByte = ("Tax:                " + String.format("%,.2f", taxTotalPrice)).getBytes();
+            byte[] totalPriceByte = ("Total:             " + String.format("%,.2f", totalPrice)).getBytes();
+            byte[] signatureByte = "Sign Here: _______________________".getBytes();
 
             ICommandBuilder builder = StarIoExt.createCommandBuilder(StarIoExt.Emulation.StarPRNT);
             builder.appendLineFeed(title);
@@ -208,6 +291,21 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
             builder.appendLineFeed(preTaxTotalByte);
             builder.appendLineFeed(taxTotalByte);
             builder.appendLineFeed(totalPriceByte);
+            builder.appendLineFeed();
+            builder.appendLineFeed(signatureByte);
+            builder.appendLineFeed();
+            builder.appendLineFeed();
+            builder.appendLineFeed();
+            builder.appendCutPaper(ICommandBuilder.CutPaperAction.PartialCutWithFeed);
+            builder.appendLineFeed();
+            builder.appendLineFeed(preTaxTotalByte);
+            builder.appendLineFeed(taxTotalByte);
+            builder.appendLineFeed(totalPriceByte);
+            builder.appendLineFeed();
+            builder.appendLineFeed(signatureByte);
+            builder.appendLineFeed();
+            builder.appendLineFeed();
+            builder.appendLineFeed();
             builder.appendCutPaper(ICommandBuilder.CutPaperAction.PartialCutWithFeed);
             builder.endDocument();
 
@@ -217,18 +315,16 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
 
             if (status.offline == false) {
                 //Print successful end
-                Log.i("Log", "Printing is all good!");
             } else {
-                Log.i("Log", "Printing is abnormal termination");
+                //print failure
             }
 
         } catch (StarIOPortException e) {
             //Error
-            Log.e("Log", "There was an error in the try", e);
             try{
                 wait(1000);
             } catch (Exception error){
-                Log.e("Couldn't wait", "error", e);
+
             }
             printReceipt();
 
@@ -237,7 +333,7 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
                 //Port close
                 StarIOPort.releasePort(port);
             } catch (StarIOPortException e) {
-                Log.i("Log", "Error closing the port");
+
             }
         }
     }
@@ -306,12 +402,75 @@ public class MainActivity extends AppCompatActivity implements MenuItemAdapter.A
         };
     }
 
+    public void openRegister(View view){
+        String portName = "";
+        try{
+            List<PortInfo> portList = StarIOPort.searchPrinter("BT:");
+
+            PortInfo currentPort = portList.get(0);
+            portName = currentPort.getPortName();
+            port = StarIOPort.getPort(portName, "Portable", 10000, MainActivity.this);
+        } catch (StarIOPortException e){
+
+        }
+
+
+        ICommandBuilder builder = StarIoExt.createCommandBuilder(StarIoExt.Emulation.StarPRNT);
+        builder.beginDocument();
+        builder.appendPeripheral(ICommandBuilder.PeripheralChannel.No1);
+        builder.endDocument();
+        byte[] data = builder.getCommands();
+        //Send the command using the communication file (pieces taken from StarPRNT's sdk)
+        Communication.sendCommandsDoNotCheckCondition(this, data, portName, "Portable", 10000, this, mCallback);
+    }
+
+    private final Communication.SendCallback mCallback = new Communication.SendCallback() {
+        @Override
+        public void onStatus(boolean result, Communication.Result communicateResult) {
+            String msg;
+            switch (communicateResult) {
+                case Success :
+                    msg = "Success!";
+                    break;
+                case ErrorOpenPort:
+                    msg = "Fail to openPort";
+                    break;
+                case ErrorBeginCheckedBlock:
+                    msg = "Printer is offline (beginCheckedBlock)";
+                    break;
+                case ErrorEndCheckedBlock:
+                    msg = "Printer is offline (endCheckedBlock)";
+                    break;
+                case ErrorReadPort:
+                    msg = "Read port error (readPort)";
+                    break;
+                case ErrorWritePort:
+                    msg = "Write port error (writePort)";
+                    break;
+                default:
+                    msg = "Unknown error";
+                    break;
+            }
+
+        }
+    };
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getMenuInflater().inflate(R.menu.main_menu, menu);
-
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch(item.getItemId()){
+            case R.id.see_totals:
+                Intent newIntent = new Intent(MainActivity.this, TotalsActivity.class);
+                startActivity(newIntent);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
 

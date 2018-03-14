@@ -1,7 +1,16 @@
 <resources>
     <string name="app_name">SwashbucklersPOS</string>
-    <string name="tax_location_1">Tax Location 1</string>
-    <string name="tax_location_2">Tax Location 2</string>
-    <string name="tax_location_3">Tax Location 3</string>
-    <string name="tax_location_4">Tax Location 4</string>
+    <string name="warrenton">Warrenton</string>
+    <string name="unincorporated_warren_county">Unincorporated Warren County</string>
+    <string name="marthasville">Marthasville</string>
+    <string name="unincorporated_st_charles_county">Unincorporated St. Charles County</string>
+    <string name="unincorporated_franklin_county">Unincorporated Franklin County</string>
+    <string name="new_mellie">New Mellie</string>
+    <string name="wentzville">Wentzville</string>
+    <string name="ofallon">Ofallon</string>
+    <string name="st_peters">St. Peters</string>
+    <string name="wright_city">Wright City</string>
+    <string name="washington">Washington</string>
+    <string name="union">Union</string>
+
 </resources>

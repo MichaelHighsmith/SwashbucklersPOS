@@ -47,7 +47,7 @@
 
         <Spinner
             android:id="@+id/tax_spinner"
-            android:layout_width="wrap_content"
+            android:layout_width="250dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:dropDownSelector="@android:color/white"
@@ -63,10 +63,20 @@
         <Button
             android:layout_width="110dp"
             android:layout_height="wrap_content"
+            android:text="Open Register"
+            android:onClick="openRegister"
+            android:layout_above="@+id/clearOrder"
+            android:textColor="@android:color/white"
+            android:background="@android:color/black"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
             android:text="Clear Order"
             android:onClick="clearOrder"
             android:layout_above="@+id/pretax_total_price_text"
-            android:id="@+id/button2"
+            android:id="@+id/clearOrder"
             android:textColor="@android:color/white"
             android:background="@android:color/black"/>
 
@@ -93,7 +103,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_margin="16dp"
-            android:onClick="print"
+            android:onClick="creditCheckout"
             android:text="Credit"
             android:textSize="28sp"
             android:textColor="@android:color/white"

@@ -28,9 +28,7 @@ public class MenuDbHelper extends SQLiteOpenHelper{
                     + ITEM_PRICE + " FLOAT NOT NULL);";
 
             database.execSQL(SQL_CREATE_ITEMS_TABLE);
-            Log.v("onCreate", "Table created successfully");
         } catch (SQLException e){
-            Log.e("OnCreate", "Error making the table", e);
         }
     }
 

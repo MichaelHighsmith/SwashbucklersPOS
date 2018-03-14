@@ -26,6 +26,7 @@
             android:name=".MenuProvider"
             android:exported="true"/>
         <activity android:name=".CashCheckoutActivity"/>
+        <activity android:name=".TotalsActivity"/>
     </application>
 
 </manifest>

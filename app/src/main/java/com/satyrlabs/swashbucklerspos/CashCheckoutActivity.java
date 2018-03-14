@@ -1,12 +1,14 @@
 package com.satyrlabs.swashbucklerspos;
 
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.starmicronics.stario.PortInfo;
 import com.starmicronics.stario.StarIOPort;
@@ -25,11 +27,13 @@ public class CashCheckoutActivity extends AppCompatActivity implements IConnecti
     EditText cashPaidTV;
     StarIoExtManager manager;
     String portName;
+    Boolean paymentLogged;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cash_layout);
+        paymentLogged = false;
 
         cashPaidTV = findViewById(R.id.cash_paid);
         changeTV = findViewById(R.id.change_tv);
@@ -40,7 +44,8 @@ public class CashCheckoutActivity extends AppCompatActivity implements IConnecti
     }
 
     public void getChange(View view){
-        if(cashPaidTV.getText() == null){
+        if(cashPaidTV.getText().toString().isEmpty()){
+            Toast.makeText(this, "Please enter an amount for cash paid", Toast.LENGTH_SHORT).show();
             return;
         }
         float cashPaid = Float.valueOf(cashPaidTV.getText().toString());
@@ -49,7 +54,6 @@ public class CashCheckoutActivity extends AppCompatActivity implements IConnecti
 
         //Check the cash drawers current state
         StarIoExtManager.CashDrawerStatus cashDrawerStatus = manager.getCashDrawerOpenStatus();
-        Log.d("cash drawer status", String.valueOf(cashDrawerStatus));
 
         //Build a command to open the register
         ICommandBuilder builder = StarIoExt.createCommandBuilder(StarIoExt.Emulation.StarPRNT);
@@ -68,6 +72,15 @@ public class CashCheckoutActivity extends AppCompatActivity implements IConnecti
             switch (communicateResult) {
                 case Success :
                     msg = "Success!";
+                    if(!paymentLogged){
+                        //add to total income for the day
+                        SharedPreferences sharedPreferences = getSharedPreferences("myPref", 0);
+                        float totalCashIncome = sharedPreferences.getFloat("totalCashIncome", 0.0f);
+                        totalCashIncome = totalCashIncome + priceTotal;
+                        sharedPreferences.edit().putFloat("totalCashIncome", totalCashIncome).apply();
+                    }
+                    //Change payment logged to true so that you don't double log by pressing the button twice)
+                    paymentLogged = true;
                     break;
                 case ErrorOpenPort:
                     msg = "Fail to openPort";
@@ -88,8 +101,6 @@ public class CashCheckoutActivity extends AppCompatActivity implements IConnecti
                     msg = "Unknown error";
                     break;
             }
-
-            Log.d("onStatus", msg);
         }
     };
 
@@ -108,10 +119,8 @@ public class CashCheckoutActivity extends AppCompatActivity implements IConnecti
             //Check that the cash drawer's activehigh is ready to open
             manager.setCashDrawerOpenActiveHigh(true);
             boolean open = manager.getCashDrawerOpenActiveHigh();
-            Log.d("active high status", String.valueOf(open));
 
         } catch (StarIOPortException e){
-            Log.e("CashCheckout", "Error opening the cash drawer", e);
         }
     }
 
@@ -124,11 +133,10 @@ public class CashCheckoutActivity extends AppCompatActivity implements IConnecti
 
     @Override
     public void onConnected(ConnectResult connectResult) {
-        Log.d("CashCheckout", "onConnected" + connectResult);
+
     }
 
     @Override
     public void onDisconnected() {
-        Log.d("CashCheckout", "onDisconnected");
     }
 }
